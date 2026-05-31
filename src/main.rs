@@ -43,6 +43,9 @@ fn app() -> Element {
             textarea {
                 class: "editor",
                 autofocus: "true",
+                autocorrect: "off",
+                autocapitalize: "off",
+                spellcheck: "false",
                 value: "{text}",
                 oninput: move |evt| text.set(evt.value()),
             }
