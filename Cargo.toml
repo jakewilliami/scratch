@@ -1,7 +1,8 @@
 [package]
 name = "scratch"
-version = "0.0.3"
+version = "0.0.4"
 edition = "2021"
 
 [dependencies]
-ply-engine = "1.1"
+dioxus = { version = "0.7.9", features = ["desktop"] }
+
