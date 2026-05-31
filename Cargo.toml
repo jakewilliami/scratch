@@ -1,8 +1,10 @@
 [package]
 name = "scratch"
-version = "0.0.7"
+version = "0.0.8"
 edition = "2021"
 
 [dependencies]
+clipboard-anywhere = "0.2.3"
+copypasta-ext = "0.4.4"
 dioxus = { version = "0.7.9", features = ["desktop"] }
 
