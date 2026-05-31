@@ -1,5 +1,7 @@
-use dioxus::desktop::{Config, LogicalSize, WindowBuilder};
-use dioxus::prelude::*;
+use dioxus::{
+    desktop::{Config, LogicalSize, WindowBuilder, tao::dpi::PhysicalPosition},
+    prelude::*,
+};
 
 const WINDOW_TITLE: &str = "scratch";
 const INIT_WINDOW_W: u16 = 400;
@@ -11,11 +13,11 @@ fn main() {
     dioxus::LaunchBuilder::desktop()
         .with_cfg(
             Config::new().with_window(
-                // github.com/DioxusLabs/dioxus/blob/c64415c0/examples/01-app-demos/calculator.rs#L23-L25
                 WindowBuilder::new()
                     .with_title(WINDOW_TITLE)
                     .with_inner_size(LogicalSize::new(INIT_WINDOW_W, INIT_WINDOW_H))
-                    .with_always_on_top(true),
+                    .with_always_on_top(true)
+                    .with_position(PhysicalPosition::new(0, 0)),
             ),
         )
         .launch(app);
@@ -33,9 +35,7 @@ fn app() -> Element {
     };
 
     rsx! {
-        // github.com/DioxusLabs/dioxus/blob/c64415c0/examples/01-app-demos/todomvc.rs#L66
         Stylesheet { href: STYLE }
-        // github.com/DioxusLabs/dioxus/blob/c64415c0/examples/03-assets-styling/fonts.rs
         style { "@font-face {{ font-family: 'JuliaMono'; src: url('{JULIAMONO}') format('truetype'); font-display: swap; }}" }
         div {
             class: "container",
