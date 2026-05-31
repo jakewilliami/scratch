@@ -14,7 +14,8 @@ fn main() {
                 // github.com/DioxusLabs/dioxus/blob/c64415c0/examples/01-app-demos/calculator.rs#L23-L25
                 WindowBuilder::new()
                     .with_title(WINDOW_TITLE)
-                    .with_inner_size(LogicalSize::new(INIT_WINDOW_W, INIT_WINDOW_H)),
+                    .with_inner_size(LogicalSize::new(INIT_WINDOW_W, INIT_WINDOW_H))
+                    .with_always_on_top(true),
             ),
         )
         .launch(app);
