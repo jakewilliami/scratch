@@ -1,6 +1,10 @@
 use copypasta_ext::{prelude::*, x11_fork::ClipboardContext};
 use dioxus::{
-    desktop::{self, Config, HotKeyState, LogicalSize, WindowBuilder, tao::dpi::PhysicalPosition},
+    desktop::{
+        self, Config, HotKeyState, LogicalSize, WindowBuilder,
+        tao::dpi::PhysicalPosition,
+        trayicon::{Icon, TrayIcon, TrayIconBuilder},
+    },
     prelude::*,
 };
 use std::env;
@@ -37,6 +41,9 @@ fn app() -> Element {
             show.toggle();
         }
     });
+
+    // Set tray icon
+    _ = use_signal(|| tray_icon());
 
     // Handle focus
     let window = desktop::use_window();
@@ -76,6 +83,35 @@ fn app() -> Element {
             }
         }
     }
+}
+
+// For now, the tray icon will be a simple rectangle vaguely representing an underscore,
+// kind of like how an underscore in some (older) terminals represent a cursor position.
+fn tray_icon() -> TrayIcon {
+    let size: u32 = 32;
+    let bar_w: u32 = 24;
+    let bar_h: u32 = 2;
+    let bar_x = (size - bar_w) / 2;
+    let bar_y = size * 2 / 3;
+
+    let rgba: Vec<u8> = (0..size * size)
+        .flat_map(|i| {
+            let x = i % size;
+            let y = i / size;
+            let in_bar = x >= bar_x && x < bar_x + bar_w && y >= bar_y && y < bar_y + bar_h;
+            if in_bar {
+                [0xE8u8, 0xE0, 0xDC, 0xFF]
+            } else {
+                [0x00u8, 0x00, 0x00, 0x00]
+            }
+        })
+        .collect();
+
+    TrayIconBuilder::new()
+        .with_tooltip("scratch")
+        .with_icon(Icon::from_rgba(rgba, size, size).unwrap())
+        .build()
+        .unwrap()
 }
 
 // Stolen from github.com/jakewilliami/cb/blob/e2506051/src/main.rs#L124-L156
