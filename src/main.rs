@@ -17,18 +17,30 @@ const JULIAMONO: Asset = asset!("/assets/fonts/julia-mono.woff2");
 const SHORTCUT: &str = "cmd+quote";
 
 fn main() {
-    dioxus::LaunchBuilder::desktop()
-        .with_cfg(
-            Config::new().with_window(
-                WindowBuilder::new()
-                    .with_title(WINDOW_TITLE)
-                    .with_inner_size(LogicalSize::new(INIT_WINDOW_W, INIT_WINDOW_H))
-                    .with_always_on_top(true)
-                    .with_visible(false)
-                    .with_position(PhysicalPosition::new(0, 0)),
-            ),
-        )
-        .launch(app);
+    let window = WindowBuilder::new()
+        .with_title(WINDOW_TITLE)
+        .with_inner_size(LogicalSize::new(INIT_WINDOW_W, INIT_WINDOW_H))
+        .with_always_on_top(true)
+        .with_visible(false)
+        .with_position(PhysicalPosition::new(0, 0));
+
+    let mut cfg = Config::new().with_window(window);
+
+    // If on macOS, specify application as an "accessory", thereby hiding it from
+    // the dock but allowing it to run in the background (v2.0.2)
+    #[cfg(target_os = "macos")]
+    {
+        use dioxus::desktop::tao::{
+            event_loop::EventLoopBuilder,
+            platform::macos::{ActivationPolicy, EventLoopExtMacOS},
+        };
+        let mut event_loop = EventLoopBuilder::with_user_event().build();
+        event_loop.set_activation_policy(ActivationPolicy::Accessory);
+        event_loop.set_dock_visibility(false);
+        cfg = cfg.with_event_loop(event_loop);
+    }
+
+    dioxus::LaunchBuilder::desktop().with_cfg(cfg).launch(app);
 }
 
 fn app() -> Element {
