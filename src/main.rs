@@ -37,6 +37,7 @@ fn main() {
         let mut event_loop = EventLoopBuilder::with_user_event().build();
         event_loop.set_activation_policy(ActivationPolicy::Accessory);
         event_loop.set_dock_visibility(false);
+        event_loop.set_activate_ignoring_other_apps(false);
         cfg = cfg.with_event_loop(event_loop);
     }
 
