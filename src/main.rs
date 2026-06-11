@@ -1,6 +1,6 @@
 use copypasta_ext::{prelude::*, x11_fork::ClipboardContext};
 use dioxus::{
-    desktop::{Config, LogicalSize, WindowBuilder, tao::dpi::PhysicalPosition},
+    desktop::{self, Config, HotKeyState, LogicalSize, WindowBuilder, tao::dpi::PhysicalPosition},
     prelude::*,
 };
 use std::env;
@@ -10,6 +10,7 @@ const INIT_WINDOW_W: u16 = 400;
 const INIT_WINDOW_H: u16 = 100;
 const STYLE: Asset = asset!("/assets/style.css");
 const JULIAMONO: Asset = asset!("/assets/fonts/julia-mono.woff2");
+const SHORTCUT: &str = "cmd+quote";
 
 fn main() {
     dioxus::LaunchBuilder::desktop()
@@ -19,6 +20,7 @@ fn main() {
                     .with_title(WINDOW_TITLE)
                     .with_inner_size(LogicalSize::new(INIT_WINDOW_W, INIT_WINDOW_H))
                     .with_always_on_top(true)
+                    .with_visible(false)
                     .with_position(PhysicalPosition::new(0, 0)),
             ),
         )
@@ -27,15 +29,36 @@ fn main() {
 
 fn app() -> Element {
     let mut text = use_signal(String::new);
-    let window = dioxus::desktop::use_window();
+    let mut show = use_signal(|| false);
 
+    // Set shortcut to show the window
+    _ = desktop::use_global_shortcut(SHORTCUT, move |state| {
+        if state == HotKeyState::Pressed {
+            show.toggle();
+        }
+    });
+
+    // Handle focus
+    let window = desktop::use_window();
+    use_effect(move || {
+        if show() {
+            window.set_visible(true);
+            window.set_focus();
+        } else {
+            window.set_visible(false);
+        }
+    });
+
+    // When escape is pressed, close window (copy to clipboard and clear buffer)
     let handle_keydown = move |evt: KeyboardEvent| {
         if evt.key() == Key::Escape {
             on_close(&text.read());
-            window.close();
+            text.set(String::new());
+            show.set(false);
         }
     };
 
+    // Primary app template
     rsx! {
         Stylesheet { href: STYLE }
         style { "@font-face {{ font-family: 'JuliaMono'; src: url('{JULIAMONO}') format('truetype'); font-display: swap; }}" }
