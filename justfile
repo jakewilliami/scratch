@@ -7,14 +7,52 @@ target := env("TARGET", "release")
 build_option := if target != "debug" { "--" + target } else { "--" }
 bin_name := `uvx --from=toml-cli toml get --toml-path=Cargo.toml package.name`
 
+# Install paths for macOS
+plist_name := "com.github.jakewilliami.scratch.plist"
+plist_src := "macos" / plist_name
+plist_dst := "~/Library/LaunchAgents" / plist_name
+apps_dir := "/Applications"
+app_name := "Scratch.app"
+app_dst := apps_dir / app_name
+
+# Uninstall message for macOS
+msg_pref := "Are you sure you want to remove "
+q := "\""
+macos_uninstall_confirm := msg_pref + q + app_dst + q + " and " + q + plist_dst + q
+
 # Run the project
 run:
     cargo run
 
+# Install the app and register it as a background launch agent
+[macos]
+install: build
+    cp -R {{app_name}} {{apps_dir}}
+    cp {{plist_src}} {{plist_dst}}
+    launchctl load {{plist_dst}}
+
+# Reinstall the app (assumes it is already loaded as a background launch agent)
+[macos]
+reinstall: build unload install
+
+[macos, private]
+unload:
+    launchctl unload {{plist_dst}}
+
+# Uninstall the app and remove the launch agent
+[macos, confirm(macos_uninstall_confirm)]
+uninstall: && _uninstall
+
+[macos, private]
+_uninstall:
+    launchctl unload {{plist_dst}}
+    rm -f {{plist_dst}}
+    rm -rf {{app_dst}}
+
 # Build the project and copy and strip the resulting binary to the root project
 [macos]
 build: build-core
-    cp -R target/dx/scratch/release/macos/Scratch.app ./
+    cp -R target/dx/scratch/release/macos/{{app_name}} ./
 
 # Core build recipe using `cargo`, used by main build recipe
 [private]
