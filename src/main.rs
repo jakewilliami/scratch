@@ -1,3 +1,5 @@
+mod platform;
+
 use copypasta_ext::{prelude::*, x11_fork::ClipboardContext};
 use dioxus::{
     desktop::{
@@ -24,22 +26,12 @@ fn main() {
         .with_visible(false)
         .with_position(PhysicalPosition::new(0, 0));
 
-    let mut cfg = Config::new().with_window(window);
+    let cfg = Config::new().with_window(window);
 
     // If on macOS, specify application as an "accessory", thereby hiding it from
     // the dock but allowing it to run in the background (v2.0.2)
     #[cfg(target_os = "macos")]
-    {
-        use dioxus::desktop::tao::{
-            event_loop::EventLoopBuilder,
-            platform::macos::{ActivationPolicy, EventLoopExtMacOS},
-        };
-        let mut event_loop = EventLoopBuilder::with_user_event().build();
-        event_loop.set_activation_policy(ActivationPolicy::Accessory);
-        event_loop.set_dock_visibility(false);
-        event_loop.set_activate_ignoring_other_apps(false);
-        cfg = cfg.with_event_loop(event_loop);
-    }
+    let cfg = platform::macos::configure_event_loop(cfg);
 
     dioxus::LaunchBuilder::desktop().with_cfg(cfg).launch(app);
 }
@@ -56,7 +48,7 @@ fn app() -> Element {
     });
 
     // Set tray icon
-    _ = use_signal(|| tray_icon());
+    _ = use_signal(tray_icon);
 
     // Handle focus
     let window = desktop::use_window();
@@ -66,6 +58,8 @@ fn app() -> Element {
             window.set_focus();
         } else {
             window.set_visible(false);
+            #[cfg(target_os = "macos")]
+            platform::macos::restore_focus();
         }
     });
 
