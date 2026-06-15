@@ -1,4 +1,7 @@
 ### Misc ###
+# bibtex auto folder when using emacs and auctex
+auto/
+
 # Annoying macOS artefact
 .DS_Store
 
@@ -21,4 +24,3 @@ target/
 
 # MSVC Windows builds of rustc generate these, which store debugging information
 *.pdb
-
