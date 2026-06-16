@@ -123,6 +123,10 @@ fn tray_icon() -> TrayIcon {
 
 // Stolen from github.com/jakewilliami/cb/blob/e2506051/src/main.rs#L124-L156
 fn on_close(s: &str) {
+    if s.is_empty() {
+        return;
+    }
+
     // Try set clipboard for WSL or SSH first, falling back to `clipboard` if unavailable
     let set_res = clipboard_anywhere::set_clipboard(s);
     let get_res = clipboard_anywhere::get_clipboard();
