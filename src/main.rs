@@ -5,7 +5,7 @@ use dioxus::{
     desktop::{
         self, Config, HotKeyState, LogicalSize, WindowBuilder,
         tao::dpi::PhysicalPosition,
-        trayicon::{Icon, TrayIcon, TrayIconBuilder},
+        trayicon::{Icon, MouseButton, MouseButtonState, TrayIcon, TrayIconBuilder, TrayIconEvent},
     },
     prelude::*,
 };
@@ -49,6 +49,20 @@ fn app() -> Element {
 
     // Set tray icon
     _ = use_signal(tray_icon);
+
+    // Allow toggle focus using tray icon
+    desktop::use_tray_icon_event_handler(move |event| {
+        if let TrayIconEvent::Click {
+            button,
+            button_state,
+            ..
+        } = event
+        {
+            if button == &MouseButton::Left && button_state == &MouseButtonState::Up {
+                show.toggle();
+            }
+        }
+    });
 
     // Handle focus
     let window = desktop::use_window();
